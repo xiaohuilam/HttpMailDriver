@@ -5,7 +5,9 @@ namespace Skyracer2012\HttpMailDriver;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Str;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\Address;
@@ -50,9 +52,9 @@ class HttpTransport extends AbstractTransport
             $personalization['dkim_selector'] = $this->dkim_selector;
             $personalization['dkim_private_key'] = $this->dkim_private_key;
         }
-        
+
         $content = [];
-        
+
         if($email->getTextBody())
         {
             $content[] = [
@@ -60,7 +62,7 @@ class HttpTransport extends AbstractTransport
                 'value' => $email->getTextBody(),
             ];
         }
-        
+
         if($email->getHtmlBody())
         {
             $content[] = [
@@ -115,7 +117,22 @@ class HttpTransport extends AbstractTransport
 
         $payload = $this->getPayload($email);
 
-        $this->client->request('POST', $this->url, $payload);
+        $res = $this->client->request('POST', $this->url, $payload);
+        $json = json_decode($res->getBody()->__toString());
+
+        if ($json && $json->status === 'ok' && isset($json->responseStatus) && Str::startsWith($json->responseStatus, '20')) {
+            return;
+        }
+
+        $errors = isset($json->responseStatus) ? $json->responseStatus : 'Unknown error';
+        if (isset($json->response)) {
+            $response = json_decode($json->response);
+            if (isset($response->errors)) {
+                $errors = collect($response->errors)->implode(', ');
+            }
+        }
+
+        throw new TransportException('Unable to send an email: ' . $errors);
     }
 
     public function __toString(): string
