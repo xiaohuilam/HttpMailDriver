@@ -1,8 +1,7 @@
 {
-    "name": "skyracer2012/http-mail-driver",
+    "name": "xiaohuilam/http-mail-driver",
     "description": "A Mail driver that sends the email in a json format to a supplied endpoint",
     "keywords": [
-        "skyracer2012",
         "http-mail-driver"
     ],
     "homepage": "https://github.com/skyracer2012/http-mail-driver",
@@ -17,12 +16,12 @@
     ],
     "require": {
         "php": ">=8.0",
-        "illuminate/support": "^10.0",
-        "symfony/mailer": "^6.0",
-        "guzzlehttp/guzzle": "^7.5"
+        "illuminate/support": ">=10.0",
+        "symfony/mailer": ">=6.0",
+        "guzzlehttp/guzzle": ">=7.5"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": ">=10.0"
     },
     "autoload": {
         "psr-4": {
